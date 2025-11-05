@@ -7,64 +7,52 @@
       </button>
     </div>
 
-    <div v-if="companyStore.loading" class="loading">Loading companies...</div>
-    <div v-else-if="companyStore.error" class="error">{{ companyStore.error }}</div>
+    <DataTable
+      :data="companyStore.companies"
+      :columns="columns"
+      :loading="companyStore.loading"
+      :row-actions="rowActions"
+      searchable
+      paginate
+      :default-per-page="15"
+      :item-count="companyStore.pagination.total"
+      @page-change="handlePageChange"
+      @per-page-change="handlePerPageChange"
+      @sort-change="handleSort"
+    >
+      <!-- Custom Code Cell -->
+      <template #cell-code="{ value }">
+        <span class="company-code">{{ value }}</span>
+      </template>
 
-    <div v-else-if="companyStore.companies.length === 0" class="no-data">
-      <p>No companies found. Click "Add Company" to create one.</p>
-    </div>
+      <!-- Custom Email Cell -->
+      <template #cell-email="{ value }">
+        <a v-if="value" :href="`mailto:${value}`" class="email-link">
+          {{ value }}
+        </a>
+        <span v-else class="text-muted">-</span>
+      </template>
 
-    <div v-else class="table-container">
-      <table>
-        <thead>
-          <tr>
-            <th>Code</th>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Phone</th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="company in companyStore.companies" :key="company.id">
-            <td>{{ company.code }}</td>
-            <td>{{ company.name }}</td>
-            <td>{{ company.email || '-' }}</td>
-            <td>{{ company.phone || '-' }}</td>
-            <td>
-              <span :class="['badge', company.is_active ? 'badge-active' : 'badge-inactive']">
-                {{ company.is_active ? 'Active' : 'Inactive' }}
-              </span>
-            </td>
-            <td class="actions">
-              <button @click="goToEdit(company.id)" class="btn-edit">Edit</button>
-              <button @click="confirmDelete(company.id)" class="btn-delete">Delete</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <!-- Custom Phone Cell -->
+      <template #cell-phone="{ value }">
+        <a v-if="value" :href="`tel:${value}`" class="phone-link">
+          {{ value }}
+        </a>
+        <span v-else class="text-muted">-</span>
+      </template>
 
-      <div class="pagination">
-        <button 
-          @click="changePage(companyStore.pagination.current_page - 1)"
-          :disabled="companyStore.pagination.current_page === 1"
-          class="btn-page"
-        >
-          Previous
-        </button>
-        <span class="page-info">
-          Page {{ companyStore.pagination.current_page }} of {{ companyStore.pagination.last_page }}
+      <!-- Custom Status Cell -->
+      <template #cell-is_active="{ value }">
+        <span :class="['status-badge', value ? 'active' : 'inactive']">
+          {{ value ? 'Active' : 'Inactive' }}
         </span>
-        <button 
-          @click="changePage(companyStore.pagination.current_page + 1)"
-          :disabled="companyStore.pagination.current_page === companyStore.pagination.last_page"
-          class="btn-page"
-        >
-          Next
-        </button>
-      </div>
-    </div>
+      </template>
+
+      <!-- Custom Created At Cell -->
+      <template #cell-created_at="{ value }">
+        <span class="date-cell">{{ formatDate(value) }}</span>
+      </template>
+    </DataTable>
 
     <div v-if="showDeleteConfirm" class="modal-overlay" @click="showDeleteConfirm = false">
       <div class="modal" @click.stop>
@@ -82,12 +70,80 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useCompanyStore } from '../stores/company'
+import { useCompanyStore, type Company } from '../stores/company'
+import DataTable from '../components/DataTable.vue'
 
 const router = useRouter()
 const companyStore = useCompanyStore()
 const showDeleteConfirm = ref(false)
 const companyToDelete = ref<number | null>(null)
+const currentSortBy = ref('id')
+const currentSortOrder = ref<'asc' | 'desc'>('asc')
+
+// Column definitions
+const columns = [
+  { 
+    key: 'id', 
+    label: 'ID', 
+    sortable: true 
+  },
+  { 
+    key: 'code', 
+    label: 'Code', 
+    sortable: true 
+  },
+  { 
+    key: 'name', 
+    label: 'Company Name', 
+    sortable: true 
+  },
+  { 
+    key: 'email', 
+    label: 'Email', 
+    sortable: true 
+  },
+  { 
+    key: 'phone', 
+    label: 'Phone', 
+    sortable: false 
+  },
+  { 
+    key: 'is_active', 
+    label: 'Status', 
+    sortable: true 
+  },
+  { 
+    key: 'created_at', 
+    label: 'Created', 
+    sortable: true 
+  },
+]
+
+// Row actions
+const rowActions = [
+  {
+    name: 'edit',
+    label: 'Edit',
+    handler: (row: Company) => goToEdit(row.id),
+    class: 'btn-edit'
+  },
+  {
+    name: 'delete',
+    label: 'Delete',
+    handler: (row: Company) => confirmDelete(row.id),
+    class: 'btn-delete'
+  }
+]
+
+// Format date helper
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString)
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  })
+}
 
 onMounted(async () => {
   try {
@@ -123,14 +179,41 @@ async function deleteCompany() {
   }
 }
 
-function changePage(page: number) {
-  companyStore.fetchCompanies(page)
+const handlePageChange = async (page: number) => {
+  await companyStore.fetchCompanies(
+    page,
+    companyStore.pagination.per_page,
+    currentSortBy.value,
+    currentSortOrder.value
+  )
+}
+
+const handlePerPageChange = async (perPage: number) => {
+  await companyStore.fetchCompanies(
+    1,
+    perPage,
+    currentSortBy.value,
+    currentSortOrder.value
+  )
+}
+
+const handleSort = async (sortBy: string, sortOrder: 'asc' | 'desc') => {
+  currentSortBy.value = sortBy
+  currentSortOrder.value = sortOrder
+  await companyStore.fetchCompanies(
+    1,
+    companyStore.pagination.per_page,
+    sortBy,
+    sortOrder
+  )
 }
 </script>
 
 <style scoped>
 .companies-list {
   padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
 .header {
@@ -157,145 +240,67 @@ h1 {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  transition: opacity 0.2s;
 }
 
 .btn-primary:hover {
   opacity: 0.9;
 }
 
-.table-container {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-thead {
-  background: #f7fafc;
-}
-
-th {
-  text-align: left;
-  padding: 1rem;
+/* Custom Cell Styles */
+.company-code {
+  font-family: 'Courier New', monospace;
   font-weight: 600;
-  color: #4a5568;
-  border-bottom: 2px solid #e2e8f0;
+  color: #4f46e5;
+  background-color: #eef2ff;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
 }
 
-td {
-  padding: 1rem;
-  border-bottom: 1px solid #e2e8f0;
+.email-link,
+.phone-link {
+  color: #3b82f6;
+  text-decoration: none;
+  transition: color 0.2s;
 }
 
-.badge {
+.email-link:hover,
+.phone-link:hover {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+.text-muted {
+  color: #9ca3af;
+  font-style: italic;
+}
+
+.status-badge {
+  display: inline-block;
   padding: 0.25rem 0.75rem;
   border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-badge.active {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.status-badge.inactive {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.date-cell {
+  color: #4b5563;
   font-size: 0.875rem;
-  font-weight: 500;
 }
 
-.badge-active {
-  background: #c6f6d5;
-  color: #22543d;
-}
-
-.badge-inactive {
-  background: #fed7d7;
-  color: #742a2a;
-}
-
-.actions {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.btn-edit, .btn-delete {
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 0.875rem;
-  font-weight: 500;
-}
-
-.btn-edit {
-  background: #e6fffa;
-  color: #234e52;
-}
-
-.btn-edit:hover {
-  background: #b2f5ea;
-}
-
-.btn-delete {
-  background: #fff5f5;
-  color: #c53030;
-}
-
-.btn-delete:hover {
-  background: #fed7d7;
-}
-
-.pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 1rem;
-  padding: 1.5rem;
-  background: #f7fafc;
-}
-
-.btn-page {
-  padding: 0.5rem 1rem;
-  border: 1px solid #e2e8f0;
-  background: white;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.btn-page:hover:not(:disabled) {
-  background: #edf2f7;
-}
-
-.btn-page:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.page-info {
-  color: #4a5568;
-  font-weight: 500;
-}
-
-.loading, .error {
-  padding: 2rem;
-  text-align: center;
-  color: #4a5568;
-}
-
-.error {
-  color: #c53030;
-}
-
-.no-data {
-  padding: 3rem 2rem;
-  text-align: center;
-  color: #4a5568;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.no-data p {
-  font-size: 1.1rem;
-  margin: 0;
-}
-
+/* Modal styles */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -315,11 +320,13 @@ td {
   border-radius: 12px;
   max-width: 400px;
   width: 90%;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
 }
 
 .modal h3 {
   margin: 0 0 1rem 0;
   color: #1a202c;
+  font-size: 1.25rem;
 }
 
 .modal p {
@@ -339,9 +346,24 @@ td {
   background: white;
   border-radius: 6px;
   cursor: pointer;
+  font-weight: 500;
 }
 
 .btn-cancel:hover {
   background: #f7fafc;
+}
+
+.btn-delete {
+  padding: 0.5rem 1rem;
+  border: none;
+  background: #ef4444;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.btn-delete:hover {
+  background: #dc2626;
 }
 </style>
