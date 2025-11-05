@@ -8,9 +8,10 @@ use Illuminate\Support\Facades\Validator;
 
 class CompanyController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $companies = Company::with('departments')->paginate(15);
+        $perPage = $request->input('per_page', 15);
+        $companies = Company::with('departments')->paginate($perPage);
         return response()->json($companies);
     }
 
