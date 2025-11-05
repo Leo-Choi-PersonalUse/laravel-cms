@@ -5,6 +5,7 @@
 /public/storage
 /public/cms
 /storage/*.key
+/storage/framework/cache/*
 /vendor
 .env
 .env.backup

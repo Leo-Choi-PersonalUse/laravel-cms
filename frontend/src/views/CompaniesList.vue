@@ -10,6 +10,10 @@
     <div v-if="companyStore.loading" class="loading">Loading companies...</div>
     <div v-else-if="companyStore.error" class="error">{{ companyStore.error }}</div>
 
+    <div v-else-if="companyStore.companies.length === 0" class="no-data">
+      <p>No companies found. Click "Add Company" to create one.</p>
+    </div>
+
     <div v-else class="table-container">
       <table>
         <thead>
@@ -85,8 +89,13 @@ const companyStore = useCompanyStore()
 const showDeleteConfirm = ref(false)
 const companyToDelete = ref<number | null>(null)
 
-onMounted(() => {
-  companyStore.fetchCompanies()
+onMounted(async () => {
+  try {
+    await companyStore.fetchCompanies()
+    console.log('Companies loaded:', companyStore.companies.length)
+  } catch (error) {
+    console.error('Failed to load companies:', error)
+  }
 })
 
 function goToCreate() {
@@ -271,6 +280,20 @@ td {
 
 .error {
   color: #c53030;
+}
+
+.no-data {
+  padding: 3rem 2rem;
+  text-align: center;
+  color: #4a5568;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.no-data p {
+  font-size: 1.1rem;
+  margin: 0;
 }
 
 .modal-overlay {
