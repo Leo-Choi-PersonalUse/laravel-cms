@@ -6,6 +6,9 @@ import Dashboard from '../views/Dashboard.vue'
 import DashboardHome from '../views/DashboardHome.vue'
 import PostsList from '../views/PostsList.vue'
 import PostForm from '../views/PostForm.vue'
+import CompaniesList from '../views/CompaniesList.vue'
+import CompanyForm from '../views/CompanyForm.vue'
+import RolesList from '../views/RolesList.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -50,6 +53,26 @@ const router = createRouter({
           path: 'posts/:id/edit',
           name: 'posts-edit',
           component: PostForm,
+        },
+        {
+          path: 'companies',
+          name: 'companies',
+          component: CompaniesList,
+        },
+        {
+          path: 'companies/create',
+          name: 'companies-create',
+          component: CompanyForm,
+        },
+        {
+          path: 'companies/:id/edit',
+          name: 'companies-edit',
+          component: CompanyForm,
+        },
+        {
+          path: 'roles',
+          name: 'roles',
+          component: RolesList,
         },
       ],
     },

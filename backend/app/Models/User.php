@@ -20,6 +20,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role_id',
     ];
 
     /**
@@ -51,5 +52,21 @@ class User extends Authenticatable
     public function posts()
     {
         return $this->hasMany(Post::class);
+    }
+
+    /**
+     * Get the role for the user.
+     */
+    public function role()
+    {
+        return $this->belongsTo(Role::class);
+    }
+
+    /**
+     * Get the staff record for the user.
+     */
+    public function staff()
+    {
+        return $this->hasOne(Staff::class);
     }
 }

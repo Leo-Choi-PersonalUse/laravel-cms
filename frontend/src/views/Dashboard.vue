@@ -25,6 +25,19 @@
             New Post
           </router-link>
         </li>
+        <li class="nav-divider"></li>
+        <li>
+          <router-link to="/dashboard/companies" class="nav-link">
+            <span class="icon">🏢</span>
+            Companies
+          </router-link>
+        </li>
+        <li>
+          <router-link to="/dashboard/roles" class="nav-link">
+            <span class="icon">👥</span>
+            Roles
+          </router-link>
+        </li>
       </ul>
 
       <div class="sidebar-footer">
@@ -94,6 +107,12 @@ async function handleLogout() {
   list-style: none;
   padding: 20px 0;
   margin: 0;
+}
+
+.nav-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 10px 20px;
 }
 
 .nav-link {

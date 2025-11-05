@@ -4,6 +4,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PostController;
+use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\StaffController;
 
 /*
 |--------------------------------------------------------------------------
@@ -29,4 +33,16 @@ Route::middleware('auth:sanctum')->group(function () {
     
     // Post CRUD
     Route::apiResource('posts', PostController::class);
+    
+    // Company management
+    Route::apiResource('companies', CompanyController::class);
+    
+    // Department management
+    Route::apiResource('departments', DepartmentController::class);
+    
+    // Role management
+    Route::apiResource('roles', RoleController::class);
+    
+    // Staff management
+    Route::apiResource('staff', StaffController::class);
 });

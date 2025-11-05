@@ -336,3 +336,33 @@
 #12 /var/www/html/artisan(24): Illuminate\\Foundation\\Console\\Kernel->handle()
 #13 {main}
 "} 
+[2025-11-05 11:26:14] local.ERROR: syntax error, unexpected token "public" {"exception":"[object] (ParseError(code: 0): syntax error, unexpected token \"public\" at /var/www/html/app/Http/Controllers/CompanyController.php:72)
+[stacktrace]
+#0 /var/www/html/vendor/composer/ClassLoader.php(427): {closure:Composer\\Autoload\\ClassLoader::initializeIncludeClosure():575}()
+#1 [internal function]: Composer\\Autoload\\ClassLoader->loadClass()
+#2 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Route.php(1096): is_a()
+#3 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Route.php(1035): Illuminate\\Routing\\Route->controllerMiddleware()
+#4 /var/www/html/vendor/laravel/framework/src/Illuminate/Routing/Router.php(818): Illuminate\\Routing\\Route->gatherMiddleware()
+#5 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Console/RouteListCommand.php(201): Illuminate\\Routing\\Router->gatherRouteMiddleware()
+#6 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Console/RouteListCommand.php(146): Illuminate\\Foundation\\Console\\RouteListCommand->getMiddleware()
+#7 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Console/RouteListCommand.php(116): Illuminate\\Foundation\\Console\\RouteListCommand->getRouteInformation()
+#8 [internal function]: Illuminate\\Foundation\\Console\\RouteListCommand->{closure:Illuminate\\Foundation\\Console\\RouteListCommand::getRoutes():115}()
+#9 /var/www/html/vendor/laravel/framework/src/Illuminate/Collections/Arr.php(600): array_map()
+#10 /var/www/html/vendor/laravel/framework/src/Illuminate/Collections/Collection.php(778): Illuminate\\Support\\Arr::map()
+#11 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Console/RouteListCommand.php(115): Illuminate\\Support\\Collection->map()
+#12 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Console/RouteListCommand.php(101): Illuminate\\Foundation\\Console\\RouteListCommand->getRoutes()
+#13 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(36): Illuminate\\Foundation\\Console\\RouteListCommand->handle()
+#14 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/Util.php(41): Illuminate\\Container\\BoundMethod::{closure:Illuminate\\Container\\BoundMethod::call():35}()
+#15 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(93): Illuminate\\Container\\Util::unwrapIfClosure()
+#16 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/BoundMethod.php(35): Illuminate\\Container\\BoundMethod::callBoundMethod()
+#17 /var/www/html/vendor/laravel/framework/src/Illuminate/Container/Container.php(662): Illuminate\\Container\\BoundMethod::call()
+#18 /var/www/html/vendor/laravel/framework/src/Illuminate/Console/Command.php(211): Illuminate\\Container\\Container->call()
+#19 /var/www/html/vendor/symfony/console/Command/Command.php(326): Illuminate\\Console\\Command->execute()
+#20 /var/www/html/vendor/laravel/framework/src/Illuminate/Console/Command.php(180): Symfony\\Component\\Console\\Command\\Command->run()
+#21 /var/www/html/vendor/symfony/console/Application.php(1088): Illuminate\\Console\\Command->run()
+#22 /var/www/html/vendor/symfony/console/Application.php(324): Symfony\\Component\\Console\\Application->doRunCommand()
+#23 /var/www/html/vendor/symfony/console/Application.php(175): Symfony\\Component\\Console\\Application->doRun()
+#24 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(201): Symfony\\Component\\Console\\Application->run()
+#25 /var/www/html/artisan(24): Illuminate\\Foundation\\Console\\Kernel->handle()
+#26 {main}
+"} 
