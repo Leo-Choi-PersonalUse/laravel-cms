@@ -10,8 +10,25 @@ class CompanyController extends Controller
 {
     public function index(Request $request)
     {
-        $perPage = $request->input('per_page', 15);
-        $companies = Company::with('departments')->paginate($perPage);
+        $perPage = $request->input('per_page', 10);
+        $sortBy = $request->input('sort_by', 'id');
+        $sortOrder = $request->input('sort_order', 'asc');
+        
+        // Validate sort order
+        $sortOrder = in_array(strtolower($sortOrder), ['asc', 'desc']) ? strtolower($sortOrder) : 'asc';
+        
+        // Allowed columns for sorting
+        $allowedSortColumns = ['id', 'name', 'code', 'email', 'phone', 'is_active', 'created_at', 'updated_at'];
+        
+        // Validate sort column
+        if (!in_array($sortBy, $allowedSortColumns)) {
+            $sortBy = 'id';
+        }
+        
+        $companies = Company::with('departments')
+            ->orderBy($sortBy, $sortOrder)
+            ->paginate($perPage);
+            
         return response()->json($companies);
     }
 

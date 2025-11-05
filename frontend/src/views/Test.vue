@@ -12,10 +12,11 @@
       :row-actions="rowActions"
       searchable
       paginate
-      :default-per-page="15"
+      :default-per-page="10"
       :item-count="companyStore.pagination.total"
       @page-change="handlePageChange"
       @per-page-change="handlePerPageChange"
+      @sort-change="handleSort"
     >
       <!-- Global Actions -->
       <template #actions>
@@ -110,6 +111,8 @@ import { useCompanyStore, type Company } from '../stores/company'
 
 const companyStore = useCompanyStore()
 const selectedCompany = ref<Company | null>(null)
+const currentSortBy = ref('id')
+const currentSortOrder = ref<'asc' | 'desc'>('asc')
 
 // Column definitions
 const columns = [
@@ -190,7 +193,12 @@ const handleAddCompany = () => {
 }
 
 const handleRefresh = async () => {
-  await companyStore.fetchCompanies()
+  await companyStore.fetchCompanies(
+    companyStore.pagination.current_page,
+    companyStore.pagination.per_page,
+    currentSortBy.value,
+    currentSortOrder.value
+  )
 }
 
 const handleView = (company: Company) => {
@@ -222,11 +230,32 @@ const closeModal = () => {
 }
 
 const handlePageChange = async (page: number) => {
-  await companyStore.fetchCompanies(page, companyStore.pagination.per_page)
+  await companyStore.fetchCompanies(
+    page,
+    companyStore.pagination.per_page,
+    currentSortBy.value,
+    currentSortOrder.value
+  )
 }
 
 const handlePerPageChange = async (perPage: number) => {
-  await companyStore.fetchCompanies(1, perPage)
+  await companyStore.fetchCompanies(
+    1,
+    perPage,
+    currentSortBy.value,
+    currentSortOrder.value
+  )
+}
+
+const handleSort = async (sortBy: string, sortOrder: 'asc' | 'desc') => {
+  currentSortBy.value = sortBy
+  currentSortOrder.value = sortOrder
+  await companyStore.fetchCompanies(
+    1,
+    companyStore.pagination.per_page,
+    sortBy,
+    sortOrder
+  )
 }
 
 // Fetch companies on mount

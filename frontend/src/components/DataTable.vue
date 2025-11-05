@@ -174,6 +174,7 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits<{
   pageChange: [page: number]
   perPageChange: [perPage: number]
+  sortChange: [sortBy: string, sortOrder: 'asc' | 'desc']
 }>()
 
 const searchQuery = ref('')
@@ -270,6 +271,11 @@ const handleSort = (key: string) => {
   } else {
     sortKey.value = key
     sortOrder.value = 'asc'
+  }
+  
+  // Emit sort change for server-side pagination
+  if (props.itemCount) {
+    emit('sortChange', key, sortOrder.value)
   }
 }
 

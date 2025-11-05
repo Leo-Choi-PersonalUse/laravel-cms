@@ -37,11 +37,11 @@ export const useCompanyStore = defineStore('company', () => {
   const loading = ref(false)
   const error = ref<string | null>(null)
 
-  async function fetchCompanies(page = 1, perPage = 15) {
+  async function fetchCompanies(page = 1, perPage = 10, sortBy = 'id', sortOrder: 'asc' | 'desc' = 'asc') {
     loading.value = true
     error.value = null
     try {
-      const response = await api.get(`/companies?page=${page}&per_page=${perPage}`)
+      const response = await api.get(`/companies?page=${page}&per_page=${perPage}&sort_by=${sortBy}&sort_order=${sortOrder}`)
       companies.value = response.data.data
       pagination.value = {
         current_page: response.data.current_page,
