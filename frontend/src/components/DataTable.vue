@@ -70,9 +70,9 @@
     </div>
 
     <!-- Pagination -->
-    <div class="table-footer" v-if="paginate && totalPages > 1">
+    <div class="table-footer" v-if="paginate && (itemCount ? itemCount > 0 : totalPages > 1)">
       <div class="pagination-info">
-        Showing {{ startIndex + 1 }} to {{ endIndex }} of {{ filteredData.length }} entries
+        Showing {{ startIndex + 1 }} to {{ endIndex }} of {{ itemCount || filteredData.length }} entries
       </div>
       <div class="pagination">
         <button
@@ -157,6 +157,7 @@ interface Props {
   emptyText?: string
   loading?: boolean
   rowActions?: RowAction[]
+  itemCount?: number
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -169,6 +170,11 @@ const props = withDefaults(defineProps<Props>(), {
   emptyText: 'No data available',
   loading: false
 })
+
+const emit = defineEmits<{
+  pageChange: [page: number]
+  perPageChange: [perPage: number]
+}>()
 
 const searchQuery = ref('')
 const sortKey = ref<string>('')
@@ -214,6 +220,9 @@ const sortedData = computed(() => {
 // Computed: Total pages
 const totalPages = computed(() => {
   if (!props.paginate) return 1
+  if (props.itemCount) {
+    return Math.ceil(props.itemCount / perPage.value)
+  }
   return Math.ceil(sortedData.value.length / perPage.value)
 })
 
@@ -238,6 +247,9 @@ const visiblePages = computed(() => {
 // Computed: Paginated data
 const paginatedData = computed(() => {
   if (!props.paginate) return sortedData.value
+  
+  // If using server-side pagination (itemCount provided), return data as-is
+  if (props.itemCount) return sortedData.value
 
   const start = (currentPage.value - 1) * perPage.value
   const end = start + perPage.value
@@ -246,7 +258,10 @@ const paginatedData = computed(() => {
 
 // Computed: Start and end indices for pagination info
 const startIndex = computed(() => (currentPage.value - 1) * perPage.value)
-const endIndex = computed(() => Math.min(startIndex.value + perPage.value, filteredData.value.length))
+const endIndex = computed(() => {
+  const total = props.itemCount || filteredData.value.length
+  return Math.min(startIndex.value + perPage.value, total)
+})
 
 // Handle sorting
 const handleSort = (key: string) => {
@@ -269,6 +284,16 @@ const formatCell = (value: any, column: Column) => {
 // Reset to first page when search or perPage changes
 watch([searchQuery, perPage], () => {
   currentPage.value = 1
+  if (props.itemCount) {
+    emit('perPageChange', perPage.value)
+  }
+})
+
+// Emit page change when using server-side pagination
+watch(currentPage, (newPage) => {
+  if (props.itemCount) {
+    emit('pageChange', newPage)
+  }
 })
 </script>
 
@@ -449,6 +474,7 @@ td {
   background: white;
   border-radius: 4px;
   font-size: 0.875rem;
+  color: #000;
   cursor: pointer;
   transition: all 0.2s;
 }

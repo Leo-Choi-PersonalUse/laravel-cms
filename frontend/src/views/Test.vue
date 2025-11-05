@@ -13,6 +13,9 @@
       searchable
       paginate
       :default-per-page="15"
+      :item-count="companyStore.pagination.total"
+      @page-change="handlePageChange"
+      @per-page-change="handlePerPageChange"
     >
       <!-- Global Actions -->
       <template #actions>
@@ -216,6 +219,14 @@ const handleDelete = async (company: Company) => {
 
 const closeModal = () => {
   selectedCompany.value = null
+}
+
+const handlePageChange = async (page: number) => {
+  await companyStore.fetchCompanies(page, companyStore.pagination.per_page)
+}
+
+const handlePerPageChange = async (perPage: number) => {
+  await companyStore.fetchCompanies(1, perPage)
 }
 
 // Fetch companies on mount
